@@ -10,8 +10,8 @@ function App() {
   return (
     <>
       <Router>
-        <Sidebar/>
-        <Switch>
+        <Sidebar />
+        <Switch >
           <Route path='/' exact component={Home} />
           <Route path='/report' component={Report} />
           <Route path='/tool' component={Tool} />

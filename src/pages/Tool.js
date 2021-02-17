@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './tool.css'
+import { Line } from 'react-chartjs-2'
 
 export class Tool extends Component {
     constructor(props) {
@@ -10,10 +11,8 @@ export class Tool extends Component {
             aterinvesteras: true,
             chablonskatt: 0.0145,
             kapitalskatt: 0.3,
-            maxYears: 18,
+            maxYears: 20,
             initialtVarde: 100.0,
-
-            chartData: {}
         }
         super(props);
         this.state = initialState;
@@ -21,14 +20,10 @@ export class Tool extends Component {
 
     generateChartData(values) {
         let labels = [];
-        for (let year = 0; year < values.iskData.length; year += 4) {
-            if (year%4===0) {
-                labels.push(year)
-            } else {
-                labels.push(undefined)
-            }
+        for (let year = 0; year < values.iskData.length; year++) {
+            labels.push(year)
         }
-        
+
         let datasets = [
             {
                 label: "ISK",
@@ -36,36 +31,25 @@ export class Tool extends Component {
                 fill: true,
                 backgroundColor: "rgba(75,192,192,0.2)",
                 borderColor: "rgba(75,192,192,1)",
-            },
+            },/*
             {
-                label: "Second dataset",
-                data: [33, 25, 35, 51, 54, 76],
-                fill: false,
-                borderColor: "#742774"
+                label: "Aktie & Fondkonto Brutto",
+                data: [...values.afGrossData],
+                fill: true,
+                backgroundColor: "rgba(75,192,192,0.2)",
+                borderColor: "rgba(75,192,192,1)",
+            },*/
+            {
+                label: "Aktie & Fondkonto Netto",
+                data: [...values.afNetData],
+                fill: true,
+                backgroundColor: "rgba(0,255,0,0.2)",
+                borderColor: "rgba(0,255,0,1)",
             }
         ]
-            
-        
-
-        const data = {
-            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-            datasets: [
-                {
-                    label: "First dataset",
-                    data: [33, 53, 85, 41, 44, 65],
-                    fill: true,
-                    backgroundColor: "rgba(75,192,192,0.2)",
-                    borderColor: "rgba(75,192,192,1)"
-                },
-                {
-                    label: "Second dataset",
-                    data: [33, 25, 35, 51, 54, 76],
-                    fill: false,
-                    borderColor: "#742774"
-                }
-            ]
-        };
-        return data;
+        console.log(labels.length)
+        console.log(datasets[0].length)
+        return { labels, datasets };
     }
 
     generateValues(initialValues) {
@@ -78,9 +62,9 @@ export class Tool extends Component {
         let maxYears = initialValues.maxYears;
         let initialtVarde = initialValues.initialtVarde;
 
-        let iskData = [];
-        let afGrossData = [];
-        let afNetData = [];
+        let iskData = [initialtVarde];
+        let afGrossData = [initialtVarde];
+        let afNetData = [initialtVarde];
 
         //isk
         let iskVarde = initialtVarde;
@@ -91,7 +75,7 @@ export class Tool extends Component {
             for (let quarter = 0; quarter < 4; quarter++) {
                 yearValue += iskVarde / 4;
                 iskVarde *= kurstillvaxtQ;
-                iskData.push(iskVarde);
+                
             }
 
             //nu kommer direktavkastning och chablonskatt
@@ -101,6 +85,7 @@ export class Tool extends Component {
                 iskUtdelning += (iskVarde * direktavkastning);
             }
             iskVarde -= (chablonskatt * yearValue);
+            iskData.push(iskVarde);
         }
 
         let afValue = initialtVarde;
@@ -109,10 +94,7 @@ export class Tool extends Component {
             //afValue *=kurstillvaxt;
             for (let quarter = 0; quarter < 4; quarter++) {
                 afValue *= kurstillvaxtQ;
-                afGrossData.push(afValue);
-                afNetData.push(initialtVarde + ((afValue - initialtVarde) * (1 - kapitalskatt)));
             }
-
 
 
             if (aterinvesteras) {
@@ -120,14 +102,12 @@ export class Tool extends Component {
             } else {
                 afUtdelning = afUtdelning + (afValue * direktavkastning * (1 - kapitalskatt));
             }
+
+            afGrossData.push(afValue);
+            afNetData.push(initialtVarde + ((afValue - initialtVarde) * (1 - kapitalskatt)));
         }
 
-        console.log(iskData[iskData.length - 1]);
-        console.log(afGrossData[afGrossData.length - 1]);
-        console.log([afNetData.length - 1]);
-        console.log(iskData.length);
-        console.log(afGrossData.length);
-        console.log(afNetData.length);
+
 
         if (!(iskData.length === afGrossData.length && iskData.length === afNetData.length)) {
             console.error("Data lengths do not match in 'generateValues()'.")
@@ -138,6 +118,31 @@ export class Tool extends Component {
             afGrossData,
             afNetData
         }
+    }
+
+    generateChartOptions(data) {
+        let suggestedMax = Math.max(...[...data.iskData,...data.afGrossData,...data.afNetData])
+
+        return {
+            scales: {
+                xAxes: [{
+                    ticks: {
+                        suggestedMin: 0,
+                        stepSize:100,
+                        maxTicksLimit: 200,
+                    }
+                }],
+                
+                yAxes: [{
+                    ticks: {
+                        //suggestedMin: 0,
+                        //suggestedMax: suggestedMax
+                        //max: 150
+                    }
+                }]
+            }
+        }
+
     }
 
     render() {
@@ -183,6 +188,9 @@ export class Tool extends Component {
                             </div>
                             <button type="submit" className="btn btn-primary">Submit</button>
                         </form>
+
+
+                        <Line data={this.generateChartData(this.generateValues(this.state))} options={this.generateChartOptions(this.generateValues(this.state))} />
 
                     </div>
 

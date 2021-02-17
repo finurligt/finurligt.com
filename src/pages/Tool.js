@@ -4,9 +4,7 @@ import './tool.css'
 
 export class Tool extends Component {
     constructor(props) {
-        super(props);
-
-        this.state = {
+        const initialState = {
             kurstillvaxt: 0.07,
             direktavkastning: 0.00,
             aterinvesteras: true,
@@ -14,15 +12,65 @@ export class Tool extends Component {
             kapitalskatt: 0.3,
             maxYears: 18,
             initialtVarde: 100.0,
-        }
 
+            chartData: {}
+        }
+        super(props);
+        this.state = initialState;
+    }
+
+    generateChartData(values) {
+        let labels = [];
+        for (let year = 0; year < values.iskData.length; year += 4) {
+            if (year%4===0) {
+                labels.push(year)
+            } else {
+                labels.push(undefined)
+            }
+        }
         
-        this.generateValues(this.state)
+        let datasets = [
+            {
+                label: "ISK",
+                data: [...values.iskData],
+                fill: true,
+                backgroundColor: "rgba(75,192,192,0.2)",
+                borderColor: "rgba(75,192,192,1)",
+            },
+            {
+                label: "Second dataset",
+                data: [33, 25, 35, 51, 54, 76],
+                fill: false,
+                borderColor: "#742774"
+            }
+        ]
+            
+        
+
+        const data = {
+            labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+            datasets: [
+                {
+                    label: "First dataset",
+                    data: [33, 53, 85, 41, 44, 65],
+                    fill: true,
+                    backgroundColor: "rgba(75,192,192,0.2)",
+                    borderColor: "rgba(75,192,192,1)"
+                },
+                {
+                    label: "Second dataset",
+                    data: [33, 25, 35, 51, 54, 76],
+                    fill: false,
+                    borderColor: "#742774"
+                }
+            ]
+        };
+        return data;
     }
 
     generateValues(initialValues) {
         let kurstillvaxt = initialValues.kurstillvaxt + 1;
-        let kurstillvaxtQ = Math.pow(kurstillvaxt, 1/4);
+        let kurstillvaxtQ = Math.pow(kurstillvaxt, 1 / 4);
         let direktavkastning = initialValues.direktavkastning + 1;
         let aterinvesteras = initialValues.aterinvesteras;
         let chablonskatt = initialValues.chablonskatt;
@@ -41,18 +89,18 @@ export class Tool extends Component {
             //kurstillvaxt och basen för chablonskatten räknas ut
             let yearValue = 0;
             for (let quarter = 0; quarter < 4; quarter++) {
-                yearValue += iskVarde/4;
+                yearValue += iskVarde / 4;
                 iskVarde *= kurstillvaxtQ;
                 iskData.push(iskVarde);
             }
-        
+
             //nu kommer direktavkastning och chablonskatt
             if (aterinvesteras) {
                 iskVarde *= direktavkastning;
             } else {
-                iskUtdelning += (iskVarde*direktavkastning);
+                iskUtdelning += (iskVarde * direktavkastning);
             }
-            iskVarde -= (chablonskatt*yearValue);
+            iskVarde -= (chablonskatt * yearValue);
         }
 
         let afValue = initialtVarde;
@@ -62,24 +110,34 @@ export class Tool extends Component {
             for (let quarter = 0; quarter < 4; quarter++) {
                 afValue *= kurstillvaxtQ;
                 afGrossData.push(afValue);
-                afNetData.push(initialtVarde + ((afValue - initialtVarde)*(1-kapitalskatt)));
+                afNetData.push(initialtVarde + ((afValue - initialtVarde) * (1 - kapitalskatt)));
             }
 
-            
+
 
             if (aterinvesteras) {
-                afValue = afValue + (afValue*(direktavkastning - 1) * (1-kapitalskatt));
+                afValue = afValue + (afValue * (direktavkastning - 1) * (1 - kapitalskatt));
             } else {
-                afUtdelning = afUtdelning + (afValue*direktavkastning * (1-kapitalskatt));
+                afUtdelning = afUtdelning + (afValue * direktavkastning * (1 - kapitalskatt));
             }
         }
 
-        console.log(iskData[iskData.length-1]);
-        console.log(afGrossData[afGrossData.length-1]);
-        console.log(afNetData[afNetData.length-1]);
+        console.log(iskData[iskData.length - 1]);
+        console.log(afGrossData[afGrossData.length - 1]);
+        console.log([afNetData.length - 1]);
         console.log(iskData.length);
         console.log(afGrossData.length);
         console.log(afNetData.length);
+
+        if (!(iskData.length === afGrossData.length && iskData.length === afNetData.length)) {
+            console.error("Data lengths do not match in 'generateValues()'.")
+        }
+
+        return {
+            iskData,
+            afGrossData,
+            afNetData
+        }
     }
 
     render() {
@@ -110,7 +168,7 @@ export class Tool extends Component {
                             </div>
                             <div className="checkbox">
                                 <label>
-                                    <input id='aterinvesteras' type="checkbox" checked={true}/> <small className="text-muted">Direktavkastning återinvesteras</small>
+                                    <input id='aterinvesteras' type="checkbox" checked={true} /> <small className="text-muted">Direktavkastning återinvesteras</small>
                                 </label>
                             </div>
                             <div className="form-group">

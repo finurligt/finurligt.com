@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './tool.css'
 import { Line } from 'react-chartjs-2'
+import { ThemeConsumer } from 'react-bootstrap/esm/ThemeProvider';
 
 export class Tool extends Component {
     constructor(props) {
@@ -9,13 +10,16 @@ export class Tool extends Component {
             kurstillvaxt: 0.07,
             direktavkastning: 0.00,
             aterinvesteras: true,
-            chablonskatt: 0.0145,
+            schablonskatt: 0.0145,
             kapitalskatt: 0.3,
-            maxYears: 20,
+            maxYears: 30,
             initialtVarde: 100.0,
         }
         super(props);
         this.state = initialState;
+
+        this.handleChange = this.handleChange.bind(this);
+        this.handleAterinvesteras = this.handleAterinvesteras.bind(this);
     }
 
     generateChartData(values) {
@@ -47,20 +51,19 @@ export class Tool extends Component {
                 borderColor: "rgba(0,255,0,1)",
             }
         ]
-        console.log(labels.length)
-        console.log(datasets[0].length)
         return { labels, datasets };
     }
 
     generateValues(initialValues) {
-        let kurstillvaxt = initialValues.kurstillvaxt + 1;
+        let kurstillvaxt = parseFloat(initialValues.kurstillvaxt) + 1;
         let kurstillvaxtQ = Math.pow(kurstillvaxt, 1 / 4);
-        let direktavkastning = initialValues.direktavkastning + 1;
+        let direktavkastning = parseFloat(initialValues.direktavkastning);
         let aterinvesteras = initialValues.aterinvesteras;
-        let chablonskatt = initialValues.chablonskatt;
-        let kapitalskatt = initialValues.kapitalskatt;
-        let maxYears = initialValues.maxYears;
-        let initialtVarde = initialValues.initialtVarde;
+        let schablonskatt = parseFloat(initialValues.schablonskatt);
+        let kapitalskatt = parseFloat(initialValues.kapitalskatt);
+        let maxYears = parseFloat(initialValues.maxYears);
+        let initialtVarde = parseFloat(initialValues.initialtVarde);
+
 
         let iskData = [initialtVarde];
         let afGrossData = [initialtVarde];
@@ -70,7 +73,7 @@ export class Tool extends Component {
         let iskVarde = initialtVarde;
         let iskUtdelning = 0;
         for (let year = 0; year < maxYears; year++) {
-            //kurstillvaxt och basen för chablonskatten räknas ut
+            //kurstillvaxt och basen för schablonskatt räknas ut
             let yearValue = 0;
             for (let quarter = 0; quarter < 4; quarter++) {
                 yearValue += iskVarde / 4;
@@ -78,14 +81,14 @@ export class Tool extends Component {
                 
             }
 
-            //nu kommer direktavkastning och chablonskatt
+            //nu kommer direktavkastning och schablonskatt
             if (aterinvesteras) {
-                iskVarde *= direktavkastning;
+                iskVarde += iskVarde*direktavkastning;
             } else {
                 iskUtdelning += (iskVarde * direktavkastning);
             }
-            iskVarde -= (chablonskatt * yearValue);
-            iskData.push(iskVarde);
+            iskVarde -= (schablonskatt * yearValue);
+            iskData.push(iskVarde+iskUtdelning);
         }
 
         let afValue = initialtVarde;
@@ -98,13 +101,13 @@ export class Tool extends Component {
 
 
             if (aterinvesteras) {
-                afValue = afValue + (afValue * (direktavkastning - 1) * (1 - kapitalskatt));
+                afValue = afValue + (afValue * (direktavkastning) * (1 - kapitalskatt));
             } else {
                 afUtdelning = afUtdelning + (afValue * direktavkastning * (1 - kapitalskatt));
             }
 
             afGrossData.push(afValue);
-            afNetData.push(initialtVarde + ((afValue - initialtVarde) * (1 - kapitalskatt)));
+            afNetData.push(initialtVarde + ((afValue - initialtVarde) * (1 - kapitalskatt) ) + afUtdelning);
         }
 
 
@@ -112,6 +115,7 @@ export class Tool extends Component {
         if (!(iskData.length === afGrossData.length && iskData.length === afNetData.length)) {
             console.error("Data lengths do not match in 'generateValues()'.")
         }
+
 
         return {
             iskData,
@@ -121,7 +125,6 @@ export class Tool extends Component {
     }
 
     generateChartOptions(data) {
-        let suggestedMax = Math.max(...[...data.iskData,...data.afGrossData,...data.afNetData])
 
         return {
             scales: {
@@ -145,6 +148,18 @@ export class Tool extends Component {
 
     }
 
+    handleChange(e, nameOfVariable) {
+        let asd = {}
+        asd[nameOfVariable] = e.target.value;
+        this.setState(asd)
+    }
+
+    handleAterinvesteras(bol) {
+        this.setState({
+            aterinvesteras: bol
+        })
+    }
+
     render() {
         return (
             <>
@@ -154,11 +169,15 @@ export class Tool extends Component {
                     <div className="col-sm-3" style={{}}></div>
 
                     <div className="col-sm-6" style={{ backgroundColor: "white" }}>
+                        
 
                         <form className='tool-form' >
+                            <h2>Jämförelse av ISK och AF-konto</h2>
+                            <small id="slutsats" className="form-text text-muted">Vad jag vill visa med den här simulationen är att det kan vara lönsamt att spara i ett Aktie &#38; Fondkonto i vissa situationer, 
+                            särskilt om du investerar långsiktigt, med låg eller ingen utdelning och inte säljer dina värdepapper förens tidsperioden är över (för då måste du ju betala skatt). Ett realistiskt exempel på detta skulle kunna vara ifall du pensionssparar i fonder.  </small>
                             <div className="form-group">
                                 <label htmlFor="kurstillvaxt">Årlig kurstillväxt</label>
-                                <input type="number" step="0.00001" className="form-control" id="kurstillvaxt" aria-describedby="kurstillvaxtHelp" placeholder="0.07" />
+                                <input type="number" step="0.0001" className="form-control" id="kurstillvaxt" aria-describedby="kurstillvaxtHelp"  onChange={(e) => this.handleChange(e, 'kurstillvaxt')} value={this.state.kurstillvaxt} />
                                 <small id="kurstillvaxtHelp" className="form-text text-muted">
                                     Årlig värdeökning på en aktie exklusive utdelning, ibland kallas denna siffra även för avkastning men då är det lite oklart på vilket sätt utdelningar inkluderas. Kurstillväxten på Stockholmsbörsen varierar alltid.
                                     I perioden 1870 - 2019 låg den totala avkastningen (kurstillväxt + återinvestering av avkastning) på i snitt 9.24%. Från 1990 till 2019 låg avkastningen (exklusive utdelningar? OMX30, <a href="https://rikatillsammans.se/stockholmsborsens-arliga-avkastning/">källa</a>) på 12.49%,
@@ -168,30 +187,45 @@ export class Tool extends Component {
                             </div>
                             <div className="form-group">
                                 <label htmlFor="direktavkastning">Direktavkastning</label>
-                                <input type="number" step="0.00001" className="form-control" id="direktavkastning" aria-describedby="kurstillvaxtHelp" placeholder="0.00" />
+                                <input type="number" step="0.0001" className="form-control" id="direktavkastning" aria-describedby="kurstillvaxtHelp" onChange={(e) => this.handleChange(e, 'direktavkastning')} value={this.state.direktavkastning}/>
                                 <small id="direktavkastningHelp" className="form-text text-muted">Procentandel av värdet på en aktie som ges tillbaka som utdelning. För en fond är detta värdet 0. I skrivande stund ligger medeln på Stockholmsbörsen på 3.4%.</small>
                             </div>
                             <div className="checkbox">
                                 <label>
-                                    <input id='aterinvesteras' type="checkbox" checked={true} /> <small className="text-muted">Direktavkastning återinvesteras</small>
+                                    <input id='aterinvesteras' type="checkbox" onChange={e => this.handleAterinvesteras(e.target.checked)} checked={this.state.aterinvesteras} /> <small className="text-muted">Direktavkastning återinvesteras</small>
                                 </label>
                             </div>
                             <div className="form-group">
                                 <label htmlFor="schablonskatt">Schablonskatt</label>
-                                <input type="number" step="0.00001" className="form-control" id="schablonskatt" aria-describedby="schablonskattHelp" placeholder="0.015" />
-                                <small id="schablonskattHelp" className="form-text text-muted">Schablonskatten har historiskt sett legat mellan 0.90% och 2.09%. <a href="https://sv.wikipedia.org/wiki/Investeringssparkonto">Källa</a>.</small>
+                                <input type="number" step="0.0001" className="form-control" id="schablonskatt" aria-describedby="schablonskattHelp" onChange={(e) => this.handleChange(e, 'schablonskatt')} value={this.state.schablonskatt}/>
+                                <small id="schablonskattHelp" className="form-text text-muted">Schablonskatten har historiskt sett legat mellan 0.90% och 2.09%, medelvärdet är 1.45%. <a href="https://sv.wikipedia.org/wiki/Investeringssparkonto">Källa</a>.</small>
                             </div>
                             <div className="form-group">
                                 <label htmlFor="kapitalskatt">Kapitalskatt</label>
-                                <input type="number" step="0.00001" className="form-control" id="kapitalskatt" aria-describedby="kapitalskattHelp" placeholder="0.30" />
+                                <input type="number" step="0.001" className="form-control" id="kapitalskatt" aria-describedby="kapitalskattHelp" onChange={(e) => this.handleChange(e, 'kapitalskatt')} value={this.state.kapitalskatt}/>
                                 <small id="kapitalskattHelp" className="form-text text-muted">Kapitalskatten har legat på 30% i över 30 år.</small>
                             </div>
-                            <button type="submit" className="btn btn-primary">Submit</button>
+                            <div className="form-group">
+                                <label htmlFor="kapitalskatt">Startkapital</label>
+                                <input type="number" step="1" className="form-control" id="kapitalskatt" aria-describedby="kapitalskattHelp" onChange={(e) => this.handleChange(e, 'initialtVarde')} value={this.state.initialtVarde}/>
+                                <small id="kapitalskattHelp" className="form-text text-muted">Mängden pengar på kontot från början.</small>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="kapitalskatt">Antal år</label>
+                                <input type="number" step="1" className="form-control" id="kapitalskatt" aria-describedby="kapitalskattHelp" onChange={(e) => this.handleChange(e, 'maxYears')} value={this.state.maxYears}/>
+                                <small id="kapitalskattHelp" className="form-text text-muted">Antal år som simulationen ska köras.</small>
+                            </div>
                         </form>
 
-
+                        {/*   
+                            todo: optimise. I call the simulationg functions like 3 times
+                        */}
                         <Line data={this.generateChartData(this.generateValues(this.state))} options={this.generateChartOptions(this.generateValues(this.state))} />
+                        <small id="slutsats" className="form-text text-muted">Slutsumman blev 
+                        {" " + Math.round(this.generateChartData(this.generateValues(this.state)).datasets[0].data[this.state.maxYears])} för ISK och 
+                        {" " + Math.round(this.generateChartData(this.generateValues(this.state)).datasets[1].data[this.state.maxYears])} för AF-konto.</small>
 
+                        
                     </div>
 
                     <div className="col-sm-3"></div>

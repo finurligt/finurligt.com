@@ -2,7 +2,6 @@ import React, { Component } from 'react'
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './tool.css'
 import { Line } from 'react-chartjs-2'
-import { ThemeConsumer } from 'react-bootstrap/esm/ThemeProvider';
 
 export class Tool extends Component {
     constructor(props) {

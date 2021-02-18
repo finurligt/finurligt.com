@@ -17,7 +17,7 @@ export const SidebarData = [
         className: 'nav-text'
     },
     {
-        title: 'Some report idk',
+        title: 'Timetracking',
         path: '/report',
         icon: <AiIcons.AiOutlineBarChart/>,
         className: 'nav-text'

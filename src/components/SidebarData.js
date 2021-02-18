@@ -11,7 +11,7 @@ export const SidebarData = [
         className: 'nav-text'
     },
     {
-        title: 'Some tool idk',
+        title: 'Jämför ISK med Aktie & Fondkonto',
         path: '/tool',
         icon: <FaIcons.FaCalculator/>,
         className: 'nav-text'

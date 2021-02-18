@@ -224,8 +224,8 @@ export class Tool extends Component {
                         <small id="slutsats" className="form-text text-muted">Slutsumman blev 
                         {" " + Math.round(this.generateChartData(this.generateValues(this.state)).datasets[0].data[this.state.maxYears])} för ISK och 
                         {" " + Math.round(this.generateChartData(this.generateValues(this.state)).datasets[1].data[this.state.maxYears])} för AF-konto.</small>
-                        <h5 className="how">Hur kan detta vara möjligt?</h5>
-                        <small id="förklaring" className="form-text text-muted">Jo! På ett AF-konto skattar du inte på kurstillväxt förens du säljer, och ränta-på-ränta-effekten gör därför att den går om ISK i det långa loppet för värdepapper med låg eller ingen utdelning.</small>
+                        <h5 id="how">Hur kan detta vara möjligt?</h5>
+                        <small id="forklaring" className="form-text text-muted">Jo! På ett AF-konto skattar du inte på kurstillväxt förens du säljer, och ränta-på-ränta-effekten gör därför att den går om ISK i det långa loppet för värdepapper med låg eller ingen utdelning.</small>
                     </div>
 
                     <div className="col-sm-2"></div>

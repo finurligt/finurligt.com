@@ -2,6 +2,10 @@
     padding: 10px;
 }
 
-.how {
+#how {
     padding-top: 5px;
+}
+
+#forklaring {
+    padding-bottom: 5px;
 }

@@ -166,9 +166,9 @@ export class Tool extends Component {
                 <div className="row" style={{
                     margin: 0
                 }}>
-                    <div className="col-sm-3" style={{}}></div>
+                    <div className="col-sm-2" style={{}}></div>
 
-                    <div className="col-sm-6" style={{ backgroundColor: "white" }}>
+                    <div className="col-sm-8" style={{ backgroundColor: "white" }}>
                         
 
                         <form className='tool-form' >
@@ -179,7 +179,7 @@ export class Tool extends Component {
                                 <label htmlFor="kurstillvaxt">Årlig kurstillväxt</label>
                                 <input type="number" step="0.0001" className="form-control" id="kurstillvaxt" aria-describedby="kurstillvaxtHelp"  onChange={(e) => this.handleChange(e, 'kurstillvaxt')} value={this.state.kurstillvaxt} />
                                 <small id="kurstillvaxtHelp" className="form-text text-muted">
-                                    Årlig värdeökning på en aktie exklusive utdelning, ibland kallas denna siffra även för avkastning men då är det lite oklart på vilket sätt utdelningar inkluderas. Kurstillväxten på Stockholmsbörsen varierar alltid.
+                                    Årlig värdeökning på en aktie exklusive utdelning. Ibland kallas denna siffra även för avkastning, men då är det lite oklart på vilket sätt utdelningar inkluderas. Kurstillväxten på Stockholmsbörsen varierar alltid.
                                     I perioden 1870 - 2019 låg den totala avkastningen (kurstillväxt + återinvestering av avkastning) på i snitt 9.24%. Från 1990 till 2019 låg avkastningen (exklusive utdelningar? OMX30, <a href="https://rikatillsammans.se/stockholmsborsens-arliga-avkastning/">källa</a>) på 12.49%,
                                     och 2009 - 2019 låg den på 10.51%. Det är vanligt att man räknar med en avkastning på 7%, eller 9% för de mer optimistiska, men dessa siffror brukar inkludera direktavkastning.
                                     Om du bara har värdepapper som inte ger utdelning (tex fonder) kan du bara ange den totala avkastningen här, men annars är det viktigt att det är just kurstillväxten du anger.
@@ -224,11 +224,11 @@ export class Tool extends Component {
                         <small id="slutsats" className="form-text text-muted">Slutsumman blev 
                         {" " + Math.round(this.generateChartData(this.generateValues(this.state)).datasets[0].data[this.state.maxYears])} för ISK och 
                         {" " + Math.round(this.generateChartData(this.generateValues(this.state)).datasets[1].data[this.state.maxYears])} för AF-konto.</small>
-
-                        
+                        <h5 className="how">Hur kan detta vara möjligt?</h5>
+                        <small id="förklaring" className="form-text text-muted">Jo! På ett AF-konto skattar du inte på kurstillväxt förens du säljer, och ränta-på-ränta-effekten gör därför att den går om ISK i det långa loppet för värdepapper med låg eller ingen utdelning.</small>
                     </div>
 
-                    <div className="col-sm-3"></div>
+                    <div className="col-sm-2"></div>
                 </div>
             </>
         )

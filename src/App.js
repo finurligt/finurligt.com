@@ -4,6 +4,7 @@ import Sidebar from './components/Sidebar';
 import Home from './pages/Home'
 import Report from './pages/Report'
 import Tool from './pages/Tool'
+import RatingLite from './pages/RatingLite'
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
           <Route path='/' exact component={Home} />
           <Route path='/report' component={Report} />
           <Route path='/tool' component={Tool} />
+          <Route path='/ratingLite' component={RatingLite} />
         </Switch>
       </Router>
     </>

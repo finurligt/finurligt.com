@@ -1,7 +1,7 @@
 import React from 'react';
 import * as FaIcons from "react-icons/fa";
 import * as AiIcons from "react-icons/ai";
-import * as IoIcons from "react-icons/io";
+import * as GiIcons from "react-icons/gi";
 
 export const SidebarData = [
     {
@@ -20,6 +20,12 @@ export const SidebarData = [
         title: 'Timetracking',
         path: '/report',
         icon: <AiIcons.AiOutlineBarChart/>,
+        className: 'nav-text'
+    },
+    {
+        title: 'Rating Lite',
+        path: '/ratingLite',
+        icon: <GiIcons.GiRank3/>,
         className: 'nav-text'
     }
 ]

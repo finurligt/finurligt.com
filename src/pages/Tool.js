@@ -13,6 +13,7 @@ export class Tool extends Component {
             kapitalskatt: 0.3,
             maxYears: 30,
             initialtVarde: 100.0,
+            fondskatt: 0.0012
         }
         super(props);
         this.state = initialState;
@@ -62,6 +63,7 @@ export class Tool extends Component {
         let kapitalskatt = parseFloat(initialValues.kapitalskatt);
         let maxYears = parseFloat(initialValues.maxYears);
         let initialtVarde = parseFloat(initialValues.initialtVarde);
+        let fondskatt = parseFloat(initialValues.fondskatt)
 
 
         let iskData = [initialtVarde];
@@ -104,7 +106,8 @@ export class Tool extends Component {
             } else {
                 afUtdelning = afUtdelning + (afValue * direktavkastning * (1 - kapitalskatt));
             }
-
+            
+            afValue = afValue * (1 - fondskatt);
             afGrossData.push(afValue);
             afNetData.push(initialtVarde + ((afValue - initialtVarde) * (1 - kapitalskatt) ) + afUtdelning);
         }
@@ -203,6 +206,11 @@ export class Tool extends Component {
                                 <label htmlFor="kapitalskatt">Kapitalskatt</label>
                                 <input type="number" step="0.001" className="form-control" id="kapitalskatt" aria-describedby="kapitalskattHelp" onChange={(e) => this.handleChange(e, 'kapitalskatt')} value={this.state.kapitalskatt}/>
                                 <small id="kapitalskattHelp" className="form-text text-muted">Kapitalskatten har legat på 30% i över 30 år.</small>
+                            </div>
+                            <div className="form-group">
+                                <label htmlFor="fondskatt">Fondskatt</label>
+                                <input type="number" step="0.001" className="form-control" id="fondskatt" aria-describedby="fondskattHelp" onChange={(e) => this.handleChange(e, 'fondskatt')} value={this.state.fondskatt} />
+                                <small id="fondskattHelp" className="form-text text-muted">Fondskatten har legat på 0.12% sedan den infördes 2012.</small>
                             </div>
                             <div className="form-group">
                                 <label htmlFor="kapitalskatt">Startkapital</label>

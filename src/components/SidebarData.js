@@ -22,10 +22,12 @@ export const SidebarData = [
         icon: <AiIcons.AiOutlineBarChart/>,
         className: 'nav-text'
     },
+    /*
     {
         title: 'Rating Lite',
         path: '/ratingLite',
         icon: <GiIcons.GiRank3/>,
         className: 'nav-text'
-    }
+    },
+    */
 ]

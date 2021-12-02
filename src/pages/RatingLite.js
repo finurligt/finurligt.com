@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import './RatingLite.css'
 import firebase from "firebase/app";
 import 'firebase/database';
-import { Link, Route, Switch, useParams, useHistory } from 'react-router-dom'
+import { Link, Route, Switch } from 'react-router-dom'
 
 
 
@@ -55,7 +55,7 @@ export class RatingLite extends Component {
     addNewLeague() {
         const usedIds = Object.values(this.state.leagues).map((obj) => obj.id)
         const newId = this.state.newLeagueName.replace(' ', '_').toLowerCase();
-        if (newId == "") {
+        if (newId === "") {
             return;
         }
         if (usedIds.includes(newId)) {
@@ -104,7 +104,7 @@ export class RatingLite extends Component {
                                     <Link key={league.id} className="dropdown-item" to={"/ratingLite/" + league.id} >{league.name}</Link>
                                 ))}
                                 <div className="dropdown-divider"></div>
-                                <a className="dropdown-item" href="#" onClick={() => this.showAddLeague()} >Add new league</a>
+                                <a className="dropdown-item" href="/#" onClick={() => this.showAddLeague()} >Add new league</a>
                             </div>
                         </div>
                         { this.state.showAddLeagueElement
@@ -162,9 +162,9 @@ class League extends Component {
     }
 
     updateWinner(e) {
-        if (e.target.value=="state") console.log(this.state)
-        if (e.target.value=="params") console.log(this.props.match.params)
-        if (e.target.value=="props") console.log(this.props)
+        if (e.target.value==="state") console.log(this.state)
+        if (e.target.value==="params") console.log(this.props.match.params)
+        if (e.target.value==="props") console.log(this.props)
         this.setState({
             winner: e.target.value
         })
@@ -187,7 +187,7 @@ class League extends Component {
     }
 
     componentDidUpdate(prevProps, prevState, snapshot) {
-        if (prevProps.match.params.leagueId != this.props.match.params.leagueId) {
+        if (prevProps.match.params.leagueId !== this.props.match.params.leagueId) {
             // if new leagueId, unsubscribe from last one and subscribe to new one
             if (this.dbRef) this.dbRef.off();
             this.dbRef = db.ref('ratingLite/games/' + this.props.match.params.leagueId);
@@ -221,7 +221,7 @@ class League extends Component {
         return (
             <>
                 <h2 className="mt-3" style={{ textAlign: "center" }}>League: {
-                    Object.values(this.props.leagues).filter((obj) => obj.id == this.props.match.params.leagueId )[0]?.name
+                    Object.values(this.props.leagues).filter((obj) => obj.id === this.props.match.params.leagueId )[0]?.name
                 }</h2> 
                 <form className="gameForm" onSubmit={this.submitGame}>
                     <div className="form-group">

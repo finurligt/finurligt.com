@@ -32,7 +32,7 @@ export class Report extends Component {
         {
             if(rawFile.readyState === 4)
             {
-                if(rawFile.status === 200 || rawFile.status == 0)
+                if(rawFile.status === 200 || rawFile.status === 0)
                 {
                     var allText = rawFile.responseText;
                     this.makeChartData(allText)
@@ -52,7 +52,7 @@ export class Report extends Component {
             borderColor: "rgba(75,192,192,1)",
         }
         
-        text.split('\n').map(element => {
+        text.split('\n').forEach(element => {
             let split = element.split("\t")
             
             labels.push(split[0]);

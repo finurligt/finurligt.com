@@ -5,6 +5,8 @@ import Home from './pages/Home'
 import Report from './pages/Report'
 import Tool from './pages/Tool'
 import RatingLite from './pages/RatingLite'
+import React from 'react';
+
 
 
 function App() {

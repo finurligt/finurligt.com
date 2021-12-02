@@ -209,7 +209,7 @@ export class Tool extends Component {
                             <div className="form-group">
                                 <label htmlFor="fondskatt">Fondskatt</label>
                                 <input type="number" step="0.001" className="form-control" id="fondskatt" aria-describedby="fondskattHelp" onChange={(e) => this.handleChange(e, 'fondskatt')} value={this.state.fondskatt} />
-                                <small id="fondskattHelp" className="form-text text-muted">Fondskatten har legat på 0.12% sedan den infördes 2012.</small>
+                                <small id="fondskattHelp" className="form-text text-muted">För att räkna med aktier istället för fonder är det bara att sätta fondskatten till 0. Fondskatten har legat på 0.12% sedan den infördes 2012.</small>
                             </div>
                             <div className="form-group">
                                 <label htmlFor="kapitalskatt">Startkapital</label>
@@ -224,7 +224,7 @@ export class Tool extends Component {
                         </form>
 
                         {/*   
-                            todo: optimise. I call the simulationg functions like 3 times
+                            todo: optimise. I call the simulating functions like 3 times
                         */}
                         <Line data={this.generateChartData(this.generateValues(this.state))} options={this.generateChartOptions(this.generateValues(this.state))} />
                         <small id="slutsats" className="form-text text-muted">Slutsumman blev 

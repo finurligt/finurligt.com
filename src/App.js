@@ -19,6 +19,7 @@ function App() {
           <Route path='/report' component={Report} />
           <Route path='/tool' component={Tool} />
           <Route path='/ratingLite' component={RatingLite} />
+          <Route path='/togglTool' component={TogglTool} />
         </Switch>
       </Router>
     </>

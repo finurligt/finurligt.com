@@ -27,6 +27,10 @@ type TimeEntry = {
 }
 
 class TogglTool extends React.Component<MyProps, MyState> {
+    constructor(props : MyProps) {
+        super(props);
+        this.setFile = this.setFile.bind(this)
+    }
     state: MyState = {
         file: null
     };
@@ -37,10 +41,17 @@ class TogglTool extends React.Component<MyProps, MyState> {
         fileReader.onload = (e : ProgressEvent) => {
             //Here is where you do stuff
             let result: string = fileReader.result as string
-            console.log(result)
+            let rows : string[] = result.split('\n')
+            rows.pop(); // last element is allways empty row
+            let data : TimeEntry[] = []
+            data = Array.from(new Set(rows)) //make unique
+            .map((row : string) => {
+                return this.createTimeEntry(row);
+            })
+            let header = data[0];
+            data = data.slice(1)
 
-            result.split('\n')
-            console.log("Number of entries: ", )
+            console.log(data[0])
 
         }
         fileReader.readAsText(e.target.files[0])

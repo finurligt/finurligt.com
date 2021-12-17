@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import Report from './pages/Report'
 import Tool from './pages/Tool'
 import RatingLite from './pages/RatingLite'
+import TogglTool from './pages/TogglTool';
 import React from 'react';
 
 

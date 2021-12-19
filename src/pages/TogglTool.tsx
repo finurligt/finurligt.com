@@ -89,9 +89,16 @@ class TogglTool extends React.Component<MyProps, MyState> {
             } else {
                 map.set(row[3], durationInseconds)
             }
+            let sortable : [string, number][] = []
+            map.forEach((value, key) => {
+                sortable.push([key,value])
+            })
+            sortable.sort((e1,e2) => {
+                return e2[1] - e1[1]
+            })
 
             let data: string[][] = [];
-            map.forEach((value, key) => {
+            sortable.forEach(([key, value]) => {
                 //console.log((value/3600).toString())
                 let hours = Math.floor(value / 3600)
                 let secondsLeft = value - (hours * 3600)
@@ -101,11 +108,25 @@ class TogglTool extends React.Component<MyProps, MyState> {
             })
 
             this.setState({report: data})
-                
+            //this.filterReport() //THIS SHOULD BE COMMENTED WHEN LIVE
         })
     }
 
-    
+    filterReport() {
+        this.setState((state) => {
+            let filterSet = new Set<string>(["Pej 2021", "Gym", "D-sektionen", "Vardagssysslor", "hemsida", "Bryggeri", "C++ fritid", "D-pong", 
+                "D-Pong 2020", "D-sek", "DWWW", "EDAA01 Labbledare 2020", "JavaFXGraphics", "Jobbsök", "Labbledare fördjupningskursen", 
+                "Labbledare forts.", "Labbledare forts. 2", "Labbledare forts. 3", "Labbledare forts. 4", "libGDX", "Medaljelele", "PEJ", "PEJ2", 
+                "PEJ2020", "Physics2D", "Spel", "Sommarprojekt", "PubProjekt", "" ])
+            let newReport : string[][] = []
+            state.report.forEach((row : string[]) => {
+                if (!filterSet.has(row[0])) {
+                    newReport.push(row)
+                }
+            })
+            return {report : newReport}
+        })
+    }
 
     render() {
         return (

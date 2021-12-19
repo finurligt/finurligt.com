@@ -1,31 +1,37 @@
-Reglerteknik	53:35:23
-C++ kurs	51:18:24
-Matstat	48:12:05
-Programvaruutveckling för stora system	44:09:10
-B2	32:11:28
-Flerdimensionell Analys	30:57:49
-Interaktionsdesign	30:31:57
-Coachning	26:46:38
-Signalbehandling i multimedia	24:43:34
-Datorsäkerhet	24:22:26
-Simulering	23:13:33
-Affärsdriven Programvaruutveckling	23:01:23
-Konfigurationshantering	19:25:15
-Kösystem	17:54:14
-Realtidsprogrammering	17:45:32
-Diskreta strukturer i datavetenskap	16:05:13
-Hållbarhet och resursanvändning	13:26:53
-Numerisk analys	12:44:18
-Linjär Algebra	12:36:23
-Datorteknik	11:53:12
-Databasteknik	10:17:30
-Tillämpad matematik - Linjära system	9:08:49
-Algodat	6:38:40
-OMD	6:22:35
-Datorkommunikation	3:45:03
-Constraint Programmering	3:00:36
-Multicore	2:31:26
-Operativsystem	1:27:53
-PVG	1:01:25
-Internet inuti	0:27:37
-Elektronik	0:03:10
+Reglerteknik,76:3:14
+Coachning,56:18:9
+C++ kurs,51:18:24
+Matstat,48:12:5
+Programvaruutveckling för stora system,44:9:10
+Webbprogrammering,37:3:5
+Konfigurationshantering,33:36:1
+Funktionsprogrammering,33:34:49
+Interaktionsdesign,32:20:57
+B2,32:11:28
+Flerdimensionell Analys,30:23:8
+Signalbehandling i multimedia,24:43:34
+Datorsäkerhet,24:22:26
+Simulering,23:13:33
+Affärsdriven Programvaruutveckling,23:1:23
+Numan,19:11:4
+Kösystem,17:54:14
+Realtidsprogrammering,17:45:32
+Diskreta strukturer i datavetenskap,16:5:13
+Horan,13:26:53
+Ingenjörsinriktad yrkesträning,13:3:13
+Linjär Algebra,12:36:23
+Datorteknik,11:53:12
+Databasteknik,10:17:30
+Tillämpad matematik - Linjära system,9:8:49
+Algodat,6:38:40
+OMD,6:22:35
+Bildanalys,6:14:50
+Tillämpad Maskininlärning,4:30:41
+Datorkommunikation,3:38:40
+Constraint Programmering,3:0:36
+Multicore,2:31:26
+Programspråkskoncept,1:47:3
+Operativsystem,1:27:53
+PVG,1:1:25
+Internet inuti,0:27:37
+Elektronik,0:3:10

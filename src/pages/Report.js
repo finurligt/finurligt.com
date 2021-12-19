@@ -53,7 +53,7 @@ export class Report extends Component {
         }
         
         text.split('\n').forEach(element => {
-            let split = element.split("\t")
+            let split = element.split(',')
             
             labels.push(split[0]);
             let timeSplit = split[1].split(':');
@@ -76,6 +76,13 @@ export class Report extends Component {
                     <div className="col-sm-2" style={{}}></div>
 
                     <div className="col-sm-8" style={{ backgroundColor: "white" }}>
+                        <h2 className="mt-3" >Timetracking</h2>
+                        <small id="slutsats" className="form-text text-muted">Jag trackar långt ifrån allt mitt plugg. 
+                        Det jag brukar tracka är "intensivt plugg", det vill säga när jag tentapluggar själv, men även där är det inte alltid jag kommer ihåg att sätta igång timern. 
+                        Grafen är därmed inte jätteanvändbar, men kan ge en vag uppfattning om vilka tentor jag tyckte var svårast (eller vilka kurser jag tyckte var kul och därmed la extra tid på...). 
+                        Jag började tracka i slutet på första terminen på tvåan, vilket är varför en del kurser saknas eller har väldigt låg summa av tid. Det finns även några kurser här som jag inte har för avsikt att avsluta.
+                        </small>
+                        
                         <Bar data={this.state.chartData} />
                     
                     </div>

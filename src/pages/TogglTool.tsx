@@ -1,5 +1,6 @@
 import React from 'react'
 import { CSVLink, CSVDownload } from "react-csv";
+import { Bar } from 'react-chartjs-2'
 
 type MyProps = {
     // using `interface` is also ok
@@ -9,7 +10,16 @@ type MyProps = {
 type MyState = {
     files: [string,string[][]][]; // like this
     mergedFile: string[][],
-    report : string [][]
+    report : string [][],
+    chartData : {labels: string[], datasets: ChartData[]} | null,
+};
+
+type ChartData = {
+    label: string;
+    data: number[];
+    fill: boolean;
+    backgroundColor: string;
+    borderColor: string;
 };
 
 class TogglTool extends React.Component<MyProps, MyState> {
@@ -20,12 +30,15 @@ class TogglTool extends React.Component<MyProps, MyState> {
         this.mergeFiles = this.mergeFiles.bind(this)
         this.makeReport = this.makeReport.bind(this)
         this.createMergedFile = this.createMergedFile.bind(this)
+        this.makeChartData = this.makeChartData.bind(this);
+
 
     }
     state: MyState = {
         files : [],
         mergedFile : [],
-        report : []
+        report : [],
+        chartData : null
     };
 
     setFile(e : any) {
@@ -52,7 +65,6 @@ class TogglTool extends React.Component<MyProps, MyState> {
             }
             fileReader.readAsText(currentFile)
         })
-        //fileReader.readAsText(e.target.files[0])
     }
 
     createMergedFile() {
@@ -107,17 +119,27 @@ class TogglTool extends React.Component<MyProps, MyState> {
                 data.push([key, hours + ":" + minutes + ":" + secondsLeft])
             })
 
-            this.setState({report: data})
-            //this.filterReport() //THIS SHOULD BE COMMENTED WHEN LIVE
+            this.setState({report: data}, () => {
+                this.filterReport(() => this.makeChartData()) // update chart after files are uploaded and filtered
+            })
+            
+            
+
+             
+
         })
     }
 
-    filterReport() {
+    filterReport(callback?: () => void) {
         this.setState((state) => {
+            let filterSet = new Set<String>()
+            //TODO: Filter functionality
+            /*
             let filterSet = new Set<string>(["Pej 2021", "Gym", "D-sektionen", "Vardagssysslor", "hemsida", "Bryggeri", "C++ fritid", "D-pong", 
                 "D-Pong 2020", "D-sek", "DWWW", "EDAA01 Labbledare 2020", "JavaFXGraphics", "Jobbsök", "Labbledare fördjupningskursen", 
                 "Labbledare forts.", "Labbledare forts. 2", "Labbledare forts. 3", "Labbledare forts. 4", "libGDX", "Medaljelele", "PEJ", "PEJ2", 
                 "PEJ2020", "Physics2D", "Spel", "Sommarprojekt", "PubProjekt", "" ])
+            */
             let newReport : string[][] = []
             state.report.forEach((row : string[]) => {
                 if (!filterSet.has(row[0])) {
@@ -125,7 +147,33 @@ class TogglTool extends React.Component<MyProps, MyState> {
                 }
             })
             return {report : newReport}
-        })
+        }, callback)
+    }
+
+    makeChartData() {
+        let labels : string[] = [];
+        
+        let dataset : ChartData = {
+            label: "Hours",
+            data: [],
+            fill: true,
+            backgroundColor: "rgba(75,192,192,0.2)",
+            borderColor: "rgba(75,192,192,1)",
+        }
+        
+        this.state.report.forEach(row => {
+            
+            
+            labels.push(row[0]);
+            let timeSplit = row[1].split(':');
+            let seconds = (+timeSplit[0]) + (+timeSplit[1]) / 60 + (+timeSplit[2]) /(60*60);
+
+            dataset.data.push(seconds);
+            
+        });
+        let chartdata = {labels, datasets: [dataset]}
+        this.setState({ chartData: chartdata })
+        console.log(this.state.report)
     }
 
     render() {
@@ -156,14 +204,21 @@ class TogglTool extends React.Component<MyProps, MyState> {
                             : <></>
                         }
                         
+                        { this.state.chartData != null ? <Bar data={this.state.chartData} /> : <></> }
+
                         {
                             this.state.mergedFile.length > 0 ? 
-                            <CSVLink data={this.state.mergedFile} enclosingCharacter='' filename={"merged-entries"}>Download Merged</CSVLink>
+                            <div className="row mt-3">
+                                <CSVLink data={this.state.mergedFile} enclosingCharacter='' filename={"merged-entries"}>Download Merged CSV</CSVLink>
+                            </div>
                             : <></>
                         }
                         {
                             this.state.report.length > 0 ? 
-                            <CSVLink data={this.state.report} enclosingCharacter='' filename={"report"}>Download Report</CSVLink>
+                            <div className="row mt-3">
+                                <CSVLink data={this.state.report} enclosingCharacter='' filename={"report"}>Download Report CSV</CSVLink>
+                            </div>
+
                             : <></>
                         }
                     </div>

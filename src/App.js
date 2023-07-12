@@ -6,6 +6,7 @@ import Report from './pages/Report'
 import Tool from './pages/Tool'
 import RatingLite from './pages/RatingLite'
 import TogglTool from './pages/TogglTool';
+import LolScore from './pages/LolScore';
 import React from 'react';
 
 
@@ -21,6 +22,7 @@ function App() {
           <Route path='/tool' component={Tool} />
           <Route path='/ratingLite' component={RatingLite} />
           <Route path='/togglTool' component={TogglTool} />
+          <Route path='/lolScore' component={LolScore} />
         </Switch>
       </Router>
     </>

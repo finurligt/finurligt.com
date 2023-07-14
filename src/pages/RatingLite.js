@@ -3,23 +3,10 @@ import './RatingLite.css'
 import firebase from "firebase/app";
 import 'firebase/database';
 import { Link, Route, Switch } from 'react-router-dom'
+import database from '../firebase';
 
 
-
-firebase.initializeApp({
-    apiKey: "AIzaSyB2p-Nt_ALgVRPN6OMnpQMScns7KubTvzQ",
-    authDomain: "finurligt-cfc45.firebaseapp.com",
-    databaseURL: "https://finurligt-cfc45-default-rtdb.firebaseio.com",
-    projectId: "finurligt-cfc45",
-    storageBucket: "finurligt-cfc45.appspot.com",
-    messagingSenderId: "831486484058",
-    appId: "1:831486484058:web:29fc9f6f632e12845b8263",
-    measurementId: "G-DY95FM51QH"
-})
-const db = firebase.database();
-
-//const database = firebase.database().ref().child("ratingLite")
-
+const db = database
 
 export class RatingLite extends Component {
 

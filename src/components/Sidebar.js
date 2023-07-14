@@ -3,6 +3,7 @@ import * as FaIcons from "react-icons/fa"
 import { Link } from 'react-router-dom'
 import { SidebarData } from './SidebarData';
 import './Sidebar.css'
+import { Login } from './Login';
 
 export class Sidebar extends Component {
     constructor(props) {
@@ -27,6 +28,9 @@ export class Sidebar extends Component {
                     <Link to="#" className='menu-bars'>
                         <FaIcons.FaBars onClick={ this.toggleSidebar } />
                     </Link>
+                    <Link to="#" className='login' data-toggle="modal" data-target="#modalLoginForm">
+                        <p className="font-weight-light mb-0 mr-2">Log in</p>
+                    </Link>
                 </div>
                 <nav className={ this.state.sidebar ? 'nav-menu open' : 'nav-menu' } >
                     <ul className='nav-menu-items' >
@@ -47,6 +51,10 @@ export class Sidebar extends Component {
                         })}
                     </ul>
                 </nav>
+                <Login isOpen="true" onClose="{closeModal}">
+                    <h2>Modal Content</h2>
+                    <p>This is the content of the modal.</p>
+                </Login>
             </div>
         )
     }

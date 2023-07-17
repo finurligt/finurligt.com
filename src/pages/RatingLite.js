@@ -3,10 +3,8 @@ import './RatingLite.css'
 import firebase from "firebase/app";
 import 'firebase/database';
 import { Link, Route, Switch } from 'react-router-dom'
-import database from '../firebase';
-
-
-const db = database
+import database from '../firebase'; //doesn't work
+import app from '../firebase';
 
 export class RatingLite extends Component {
 
@@ -62,7 +60,7 @@ export class RatingLite extends Component {
     }
 
     componentDidMount() {
-        var dbRef = db.ref('ratingLite/leagues');
+        var dbRef = app.database().ref('ratingLite/leagues');
         dbRef.on('value', (snapshot) => {
             const data = snapshot.val();
 
@@ -91,7 +89,7 @@ export class RatingLite extends Component {
                                     <Link key={league.id} className="dropdown-item" to={"/ratingLite/" + league.id} >{league.name}</Link>
                                 ))}
                                 <div className="dropdown-divider"></div>
-                                <a className="dropdown-item" href="/#" onClick={() => this.showAddLeague()} >Add new league</a>
+                                <a className="dropdown-item" onClick={() => this.showAddLeague()} >Add new league</a>
                             </div>
                         </div>
                         { this.state.showAddLeagueElement
@@ -164,7 +162,7 @@ class League extends Component {
     }
 
     componentDidMount() {
-        this.dbRef = db.ref('ratingLite/games/' + this.props.match.params.leagueId);
+        this.dbRef = app.database().ref('ratingLite/games/' + this.props.match.params.leagueId);
             this.dbRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 this.setState({
@@ -177,7 +175,7 @@ class League extends Component {
         if (prevProps.match.params.leagueId !== this.props.match.params.leagueId) {
             // if new leagueId, unsubscribe from last one and subscribe to new one
             if (this.dbRef) this.dbRef.off();
-            this.dbRef = db.ref('ratingLite/games/' + this.props.match.params.leagueId);
+            this.dbRef = app.database().ref('ratingLite/games/' + this.props.match.params.leagueId);
             this.dbRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 this.setState({

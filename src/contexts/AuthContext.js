@@ -29,6 +29,7 @@ class AuthProvider extends Component {
 
   login(email, password) {
     return auth.signInWithEmailAndPassword(email, password);
+    
   }
 
   logout() {

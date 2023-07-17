@@ -1,5 +1,6 @@
 import firebase from "firebase/app";
 import "firebase/auth";
+import 'firebase/database'
 
 const app = firebase.initializeApp({
     apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
@@ -13,5 +14,7 @@ const app = firebase.initializeApp({
 })
 
 export const auth = app.auth()
-export const database = app.database
+//TODO: The row below doesn't work. For some reason I can't call .ref() on it
+// Instead I call .database().ref() on app, and for some reason that works.
+export const database = app.database() 
 export default app

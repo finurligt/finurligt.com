@@ -22,6 +22,12 @@ export const SidebarData = [
         icon: <AiIcons.AiOutlineBarChart/>,
         className: 'nav-text'
     },
+    {
+        title: 'Toggl Tool',
+        path: '/togglTool',
+        icon: <FaIcons.FaWrench/>,
+        className: 'nav-text'
+    },
     /*
     {
         title: 'Rating Lite',

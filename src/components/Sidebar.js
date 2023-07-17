@@ -3,6 +3,9 @@ import * as FaIcons from "react-icons/fa"
 import { Link } from 'react-router-dom'
 import { SidebarData } from './SidebarData';
 import './Sidebar.css'
+import Login from './Login';
+import withAuth from '../contexts/withAuth';
+
 
 export class Sidebar extends Component {
     constructor(props) {
@@ -13,6 +16,8 @@ export class Sidebar extends Component {
     }
 
     toggleSidebar() {
+        const { auth } = this.props;
+        console.log(auth)
         this.setState((state) => ({
             sidebar: !state.sidebar
           }), () => {
@@ -21,12 +26,25 @@ export class Sidebar extends Component {
     }
 
     render() {
+        const { auth } = this.props;
+        
         return (
             <div>
                 <div className="navbar">
                     <Link to="#" className='menu-bars'>
-                        <FaIcons.FaBars onClick={ this.toggleSidebar } />
+                        <FaIcons.FaBars onClick={this.toggleSidebar} />
                     </Link>
+                    {!auth.currentUser
+                        ?
+                        <Link to="#" className='login' data-toggle="modal" data-target="#modalLoginForm">
+                            <p className="font-weight-light mb-0 mr-2">Log in</p>
+                        </Link>
+                        :
+                        <Link to="#" onClick={() => auth.logout()}>
+                            <p className="font-weight-light mb-0 mr-2">Log out</p>
+                        </Link>
+                    }
+
                 </div>
                 <nav className={ this.state.sidebar ? 'nav-menu open' : 'nav-menu' } >
                     <ul className='nav-menu-items' >
@@ -47,9 +65,11 @@ export class Sidebar extends Component {
                         })}
                     </ul>
                 </nav>
+                <Login isOpen="true" onClose="{closeModal}">
+                </Login>
             </div>
         )
     }
 }
 
-export default Sidebar
+export default withAuth(Sidebar)

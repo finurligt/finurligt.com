@@ -16,8 +16,6 @@ export class Sidebar extends Component {
     }
 
     toggleSidebar() {
-        const { auth } = this.props;
-        console.log(auth)
         this.setState((state) => ({
             sidebar: !state.sidebar
           }), () => {

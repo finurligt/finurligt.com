@@ -29,8 +29,8 @@ class Login extends Component {
         this.setState({ error: "", loading: true });
         auth.login(this.state.email, this.state.password)
             .then(() => {
-                //this.setState({ showModal: false })
                 this.modalRef.current.click();
+                this.setState({ loading: false })
             })
             .catch((e) => {
                 console.log(e)

@@ -20,6 +20,7 @@ type MyState = {
     items: string[];
     showResults: boolean;
     item: string
+    data: any
 };
 
 type Transaction = {
@@ -46,7 +47,8 @@ class TravianTool extends React.Component<MyProps, MyState> {
         searchQuery: "",
         items: ["asd","test","test2"],
         showResults: false,
-        item: ""
+        item: "",
+        data: null,
     };
     private databaseRef : firebase.database.Reference | null = null;
     blurTimeout: NodeJS.Timeout | null = null;
@@ -59,6 +61,10 @@ class TravianTool extends React.Component<MyProps, MyState> {
     componentDidUpdate(prevProps: MyProps) {
         //it's important to have a break condition here, because updating state will call componentDidUpdate again
         if (prevProps.auth.currentUser !== this.props.auth.currentUser) {
+            /*  
+            We need this because we need the data to change whenever currentUser changes. 
+            There might be a better way though
+            */
             const { auth } = this.props;
             this.updateDatabaseReference(auth.currentUser?.uid);
         }
@@ -69,13 +75,23 @@ class TravianTool extends React.Component<MyProps, MyState> {
     }
 
     updateDatabaseReference(userId: string) {
-        console.log(this.state)
         this.databaseRef?.off();
-        this.databaseRef = app.database().ref(`${userId}/${this.state.server}`); //TODO: path
+        console.log(`db ref to travianTool/${userId}`)
+        this.databaseRef = app.database().ref(`travianTool/${userId}`); //TODO: path
         this.databaseRef.on('value', (snapshot) => {
-            const data = snapshot.val();
-            //this.setState({ data }); //TODO
+            const data = snapshot.val()
+            this.processData(data); //this should not be done here? or maybe it should
+            
         });
+    }
+
+    processData(data : any) {
+        
+        data && this.state.server && this.setState({ data : Object.values(data[this.state.server]) }) //TODO
+        console.log(data) 
+        //this is not good because we dont want to do this every time state updates, 
+        //so state should not be accessed in here
+        //and anyways we don't wanna redo the calculation on every render, we can't just do this outside the thingy
     }
 
     parseAuctionData(input: string, time: number, daysAgo: number): Transaction[]  {
@@ -104,17 +120,21 @@ class TravianTool extends React.Component<MyProps, MyState> {
         return result; 
     }
 
-    handleInsertData(data: string, time: number, daysAgo: number) { //should return promise
+    handleInsertData(data: string, time: number, daysAgo: number) : Promise<(firebase.database.Reference | null)[]> {
         //parse data
-        
         let auctions = this.parseAuctionData(data, time, daysAgo)
-        console.log(auctions)
-        //insert data into db
         
         const { auth } = this.props;
-        console.log(auth.currentUser)
-        let dbRef = app.database().ref(auth.currentUser.uid + '') //TODO no
-
+        let dbRef = this.databaseRef
+        let promises : (firebase.database.ThenableReference | null)[] = auctions.map((auc) => {
+            if (dbRef) {
+                return dbRef.child(this.state.server).push(auc)
+            } else {
+                console.log("Warnign: this should never happen")
+                return null
+            }
+        })
+        return Promise.all(promises)
 
         //return promise from db
     }
@@ -158,7 +178,6 @@ class TravianTool extends React.Component<MyProps, MyState> {
         this.setState({
             item
         })
-        console.log("selected ",item)
     }
 
     render() {
@@ -195,30 +214,37 @@ class TravianTool extends React.Component<MyProps, MyState> {
                             <>
                                 <h3 className="mt-3" style={{ textAlign: "center" }}>Server: {this.state.server}</h3>
                                 <div>
-                                {/* Search bar */}
-                                <div className="form-group" style={{ marginBottom: '0' }}>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        placeholder="Search..."
-                                        value={searchQuery}
-                                        onChange={this.handleSearchInputChange}
-                                        onBlur={this.handleSearchBlur}
-                                        onFocus={this.handleSearchFocus}
-                                    />
-                                </div>
+                                    {/* Search bar */}
+                                    <div className="form-group" style={{ marginBottom: '0' }}>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="Search..."
+                                            value={searchQuery}
+                                            onChange={this.handleSearchInputChange}
+                                            onBlur={this.handleSearchBlur}
+                                            onFocus={this.handleSearchFocus}
+                                        />
+                                    </div>
 
-                                {/* Display the search results */}
-                                {showResults && (
-                                    <ul className="list-group">
-                                        {filteredItems.map((item) => (
-                                            <li onClick={() => this.selectItem(item)} key={item} className="list-group-item">
-                                                {item}
-                                            </li>
-                                        ))}
-                                    </ul>
-                                )}
-                            </div>
+                                    {/* Display the search results */}
+                                    {showResults && (
+                                        <ul className="list-group">
+                                            {filteredItems.map((item) => (
+                                                <li onClick={() => this.selectItem(item)} key={item} className="list-group-item">
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                    { this.state.item &&
+                                        <>
+                                            <h2 className="mt-3" style={{ textAlign: "center" }}>{ this.state.item }</h2>
+                                            
+                                        </>
+                                    }
+                                    
+                                </div>
                                 <div className="row" style={{
                                     margin: 0
                                 }}>

@@ -1,10 +1,12 @@
 import React, { ChangeEvent, ChangeEventHandler } from 'react'
 import { Alert } from 'react-bootstrap';
+import firebase from 'firebase/app';
+
 
 type MyProps = {
     // using `interface` is also ok
     //message: string;
-    handleData: (data: string, time: number, daysAgo : number) => void
+    handleData: (data: string, time: number, daysAgo : number) => Promise<(firebase.database.Reference | null)[]>
 };
 
 type MyState = {
@@ -36,8 +38,13 @@ class InsertDataModal extends React.Component<MyProps, MyState> {
     };
 
     insertData() {
-        this.props.handleData(this.state.data, this.state.time, this.state.daysAgo); //this will return a promise so we can handle loading
-
+        this.setState({ error: "", loading: true })
+        this.props.handleData(this.state.data, this.state.time, this.state.daysAgo)
+            .then(() => {
+                this.modalRef.current.click();
+                this.setState({ loading: false })
+            })
+        
     }
 
     setDaysAgo(e : ChangeEvent<HTMLInputElement>) {

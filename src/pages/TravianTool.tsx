@@ -4,6 +4,7 @@ import InsertDataModal from './InsertDataModal';
 import withAuth from '../contexts/withAuth';
 import firebase from 'firebase/app';
 import { Link } from 'react-router-dom'
+import TravianToolChart from '../components/TravianToolChart';
 
 
 
@@ -17,10 +18,12 @@ type MyState = {
     servers: string[];
     showAddServerElement: boolean;
     searchQuery: string;
-    items: string[];
+    items: Set<string>;
     showResults: boolean;
-    item: string
-    data: any
+    item: string;
+    data: ServerData | null;
+    newServerName: string;
+    dayData: {x: number, y: number}[];
 };
 
 type Transaction = {
@@ -32,6 +35,13 @@ type Transaction = {
     time: number; //between 00 and 23, or -1 for non existant
 };
 
+interface ServerData {
+    [serverName: string]: {
+      [transactionId: string]: Transaction;
+    };
+  }
+  
+
 class TravianTool extends React.Component<MyProps, MyState> {
     constructor(props : MyProps) {
         super(props);
@@ -42,13 +52,15 @@ class TravianTool extends React.Component<MyProps, MyState> {
     }
     state: MyState = {
         server : "",
-        servers : ["asdasd"],
+        servers : [],
         showAddServerElement: false,
         searchQuery: "",
-        items: ["asd","test","test2"],
+        items: new Set(),
         showResults: false,
         item: "",
-        data: null,
+        data: null, //this.state.data?[server] <- in here be transactions
+        newServerName: "",
+        dayData: [],
     };
     private databaseRef : firebase.database.Reference | null = null;
     blurTimeout: NodeJS.Timeout | null = null;
@@ -80,18 +92,22 @@ class TravianTool extends React.Component<MyProps, MyState> {
         this.databaseRef = app.database().ref(`travianTool/${userId}`); //TODO: path
         this.databaseRef.on('value', (snapshot) => {
             const data = snapshot.val()
-            this.processData(data); //this should not be done here? or maybe it should
             
+            this.setState({ 
+                
+                data: data,
+                server: "",
+                servers: data ? Object.keys(data) : [],
+                item: ""
+             })   
         });
     }
 
-    processData(data : any) {
-        
-        data && this.state.server && this.setState({ data : Object.values(data[this.state.server]) }) //TODO
-        console.log(data) 
-        //this is not good because we dont want to do this every time state updates, 
-        //so state should not be accessed in here
-        //and anyways we don't wanna redo the calculation on every render, we can't just do this outside the thingy
+    processData() {
+        if (this.state.data) {
+            Object.values(this.state.data[this.state.server])
+        }
+
     }
 
     parseAuctionData(input: string, time: number, daysAgo: number): Transaction[]  {
@@ -146,9 +162,21 @@ class TravianTool extends React.Component<MyProps, MyState> {
     }
 
     setServer(server : string) {
-        this.setState({
-            server: server
-        })
+        if (this.state.data && this.state.data[server]) {
+            const transactionArray = Object.values(this.state.data[server])
+            const items = new Set(transactionArray.map((tr) => tr.item))
+            this.setState({
+                server: server,
+                items: items,
+                item: ""
+                
+            })
+        } else {
+            this.setState({
+                server: server, //should also empty items
+            })
+        }
+        
     }
 
     handleSearchInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -175,19 +203,56 @@ class TravianTool extends React.Component<MyProps, MyState> {
     };
 
     selectItem(item : string) {
-        this.setState({
-            item
+        
+        if (this.state.data) {
+            const transactionArray = Object.values(this.state.data[this.state.server])
+            const filteredTransactionArray = transactionArray.filter((tr : Transaction) => {
+                return tr.item === item
+            })
+            const dayData = filteredTransactionArray.map((tr) => {
+                return {x: (Math.floor((tr.timeStamp - Date.now())/86400000)), y: tr.price/tr.quantity}
+            })
+            this.setState({
+                dayData: dayData,
+                item: item
+            })
+        } else {
+            this.setState({
+                item,
+            })
+        }
+
+
+        
+    }
+
+    addNewServer(): void {
+        this.setState((oldState) => {
+            return {
+                servers: [...oldState.servers, oldState.newServerName],
+                showAddServerElement: false,
+                newServerName: ""
+            }
         })
     }
 
+    handleNewServerInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newServerName = event.target.value;
+        this.setState({ 
+            newServerName,
+        });
+    };
+
     render() {
 
-        const { items, searchQuery, showResults } = this.state;
+        const { items, searchQuery, showResults, newServerName } = this.state;
 
         // Filter items based on the search query
-        const filteredItems = items.filter((item) =>
+        const filteredItems = [...items].filter((item) =>
             item.toLowerCase().includes(searchQuery.toLowerCase())
         );
+
+        console.log(this.state.dayData)
 
         return (
             
@@ -210,6 +275,16 @@ class TravianTool extends React.Component<MyProps, MyState> {
                                 <a className="dropdown-item" onClick={() => this.showAddServer()} >Add new server</a>
                             </div>
                         </div>
+                        { this.state.showAddServerElement
+                            ? 
+                            <div className="input-group mt-3">
+                                <input type="text" className="form-control" placeholder="League Name" aria-label="League Name" aria-describedby="basic-addon2" value={newServerName} onChange={this.handleNewServerInputChange} />
+                                <div className="input-group-append">
+                                    <button onClick={() => this.addNewServer()} className="btn btn-outline-secondary" type="button" >Add</button>
+                                </div>
+                            </div>
+                            : <></>
+                        }
                         {this.state.server &&
                             <>
                                 <h3 className="mt-3" style={{ textAlign: "center" }}>Server: {this.state.server}</h3>
@@ -238,10 +313,10 @@ class TravianTool extends React.Component<MyProps, MyState> {
                                         </ul>
                                     )}
                                     { this.state.item &&
-                                        <>
-                                            <h2 className="mt-3" style={{ textAlign: "center" }}>{ this.state.item }</h2>
-                                            
-                                        </>
+                                    <>
+                                        <h2 className="mt-3" style={{ textAlign: "center" }}>{this.state.item}</h2>
+                                        <TravianToolChart data={this.state.dayData} />
+                                    </>
                                     }
                                     
                                 </div>

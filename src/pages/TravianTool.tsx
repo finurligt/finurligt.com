@@ -209,8 +209,13 @@ class TravianTool extends React.Component<MyProps, MyState> {
             const filteredTransactionArray = transactionArray.filter((tr : Transaction) => {
                 return tr.item === item
             })
+            let minX = 0;
             const dayData = filteredTransactionArray.map((tr) => {
-                return {x: (Math.floor((tr.timeStamp - Date.now())/86400000)), y: tr.price/tr.quantity}
+                let x = (Math.floor(((tr.timeStamp - Date.now())/86400000)+0.5));
+                if (x < minX) minX = x;
+                return {x: x, y: tr.price/tr.quantity}
+            }).map((dp) => {
+                return {x: dp.x-minX, y: dp.y}
             })
             this.setState({
                 dayData: dayData,
@@ -251,8 +256,6 @@ class TravianTool extends React.Component<MyProps, MyState> {
         const filteredItems = [...items].filter((item) =>
             item.toLowerCase().includes(searchQuery.toLowerCase())
         );
-
-        console.log(this.state.dayData)
 
         return (
             

@@ -25,19 +25,22 @@ class TravianToolChart extends Component<TravianToolChartProps, TravianToolChart
   componentDidUpdate(prevProps: TravianToolChartProps, prevState: TravianToolChartState) {
     // Perform any updates or side-effects based on props or state changes
     if (prevProps !== this.props) {
-      console.log(this.props.data)
       this.calculateTrendline(this.props.data, ORDER)
     }
   }
   
   calculateTrendline = (data: PolynomialRegression.DataPoint[], order: number) => {
-    const model = PolynomialRegression.read(data, order);
-    const terms = model.getTerms();
-    
     const xs = data.map((p => p.x))
     const xmax = Math.max(...xs)
     const xmin = Math.min(...xs)
-    console.log(xs)
+    const numOfUniqueX = (new Set(xs)).size
+    
+    const model = PolynomialRegression.read(data.map((dp) => { 
+      return {x: dp.x, y: dp.y}
+    }), order >= numOfUniqueX ? numOfUniqueX-1 : order); //order needs to be smaller than numOfUniqueX for mafs reasons
+    const terms = model.getTerms();
+    
+
 
     let datapoints : {x: number, y: number}[] = []
     for (let i = xmin; i <= xmax; i++) {
@@ -51,12 +54,15 @@ class TravianToolChart extends Component<TravianToolChartProps, TravianToolChart
       trendline: datapoints
     })
 
+
+
+
+   
+
   };
 
   render() {
     const { data } = this.props;
-
-    // Calculate the polynomial regression coefficients (second-order polynomial in this example)
 
     // Prepare the dataset for the scatter plot
     const scatterData = {
@@ -79,16 +85,21 @@ class TravianToolChart extends Component<TravianToolChartProps, TravianToolChart
       ],
     };
 
-    // Customize the options for the scatter plot
     const scatterOptions = {
       scales: {
-        x: {
-          type: 'linear', // Use 'linear' scale for X-axis (numeric values)
-          position: 'bottom',
-        },
-        y: {
-          type: 'linear', // Use 'linear' scale for Y-axis (numeric values)
-        },
+        xAxes: [{
+          ticks: {
+            type: 'linear', // Use 'linear' scale for X-axis (numeric values)
+            position: 'bottom',
+          }
+        }],
+        yAxes: [{
+          ticks: {
+            suggestedMin: 0,
+            //suggestedMax: suggestedMax
+            //max: 150
+          }
+        }]
       },
       plugins: {
         legend: {

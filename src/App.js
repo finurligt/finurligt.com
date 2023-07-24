@@ -8,6 +8,7 @@ import RatingLite from './pages/RatingLite'
 import TogglTool from './pages/TogglTool';
 import React from 'react';
 import AuthProvider from './contexts/AuthContext';
+import TravianTool from './pages/TravianTool';
 
 
 
@@ -23,6 +24,7 @@ function App() {
             <Route path='/tool' component={Tool} />
             <Route path='/ratingLite' component={RatingLite} />
             <Route path='/togglTool' component={TogglTool} />
+            <Route path='/travianTool' component={TravianTool} />
           </Switch>
         </Router>
       </AuthProvider>

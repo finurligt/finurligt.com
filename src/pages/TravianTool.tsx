@@ -5,6 +5,7 @@ import withAuth from '../contexts/withAuth';
 import firebase from 'firebase/app';
 import { Link } from 'react-router-dom'
 import TravianToolChart from '../components/TravianToolChart';
+import DataTable from '../components/DataTable';
 
 
 
@@ -88,7 +89,6 @@ class TravianTool extends React.Component<MyProps, MyState> {
 
     updateDatabaseReference(userId: string) {
         this.databaseRef?.off();
-        console.log(`db ref to travianTool/${userId}`)
         this.databaseRef = app.database().ref(`travianTool/${userId}`); //TODO: path
         this.databaseRef.on('value', (snapshot) => {
             const data = snapshot.val()
@@ -96,11 +96,13 @@ class TravianTool extends React.Component<MyProps, MyState> {
             this.setState({ 
                 
                 data: data,
-                server: "",
                 servers: data ? Object.keys(data) : [],
                 item: ""
              })   
         });
+        this.setState({
+            server: ""
+        })
     }
 
     processData() {
@@ -257,6 +259,8 @@ class TravianTool extends React.Component<MyProps, MyState> {
             item.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
+        const yValues = this.state.dayData.map(dp => dp.y)
+
         return (
             
             <div>
@@ -319,6 +323,16 @@ class TravianTool extends React.Component<MyProps, MyState> {
                                     <>
                                         <h2 className="mt-3" style={{ textAlign: "center" }}>{this.state.item}</h2>
                                         <TravianToolChart data={this.state.dayData} />
+                                        <h3 className="mt-3" style={{ textAlign: "center" }}>Percentiles</h3>
+                                        <DataTable columns={["10%", "20%", "30%", "40%", "Average"]} data={[
+                                            [
+                                                calculatePercentile(yValues,10).toString(),
+                                                calculatePercentile(yValues,20).toString(),
+                                                calculatePercentile(yValues,30).toString(),
+                                                calculatePercentile(yValues,40).toString(),
+                                                (yValues.reduce((a, b) => a + b, 0) / yValues.length).toString()
+                                            ]
+                                        ]} />
                                     </>
                                     }
                                     
@@ -337,6 +351,30 @@ class TravianTool extends React.Component<MyProps, MyState> {
 
             </div>
         );
+    }
+}
+
+function calculatePercentile(data: number[], percentile: number): number {
+    if (percentile <= 0 || percentile >= 100) {
+        throw new Error('Percentile must be between 0 and 100.');
+    }
+    // Sort the data in ascending order
+    const sortedData = data.slice().sort((a, b) => a - b); //optimization possible, no need to redo this every time
+
+    // Calculate the rank
+    const rank = (percentile / 100) * (sortedData.length - 1) + 1;
+
+    // Check if the rank is an integer
+    if (Number.isInteger(rank)) {
+        // If rank is an integer, return the value at that rank
+        return sortedData[rank - 1];
+    } else {
+        // If rank is not an integer, take the average of the values at ranks above and below
+        const lowerRank = Math.floor(rank);
+        const upperRank = Math.ceil(rank);
+        const lowerValue = sortedData[lowerRank - 1];
+        const upperValue = sortedData[upperRank - 1];
+        return (lowerValue + upperValue) / 2;
     }
 }
 

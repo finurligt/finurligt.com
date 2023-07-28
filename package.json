@@ -50,6 +50,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-proposal-private-property-in-object": "^7.21.11",
     "@types/react-csv": "^1.1.2"
   }
 }

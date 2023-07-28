@@ -25,6 +25,9 @@ type MyState = {
     data: ServerData | null;
     newServerName: string;
     dayData: {x: number, y: number}[];
+    recentDayData: {x: number, y: number}[];
+    recentNumOfDays: number;
+    sortedFilteredTransactions: Transaction[]
 };
 
 type Transaction = {
@@ -62,6 +65,9 @@ class TravianTool extends React.Component<MyProps, MyState> {
         data: null, //this.state.data?[server] <- in here be transactions
         newServerName: "",
         dayData: [],
+        recentDayData: [],
+        recentNumOfDays: 0,
+        sortedFilteredTransactions: [],
     };
     private databaseRef : firebase.database.Reference | null = null;
     blurTimeout: NodeJS.Timeout | null = null;
@@ -142,7 +148,6 @@ class TravianTool extends React.Component<MyProps, MyState> {
         //parse data
         let auctions = this.parseAuctionData(data, time, daysAgo)
         
-        const { auth } = this.props;
         let dbRef = this.databaseRef
         let promises : (firebase.database.ThenableReference | null)[] = auctions.map((auc) => {
             if (dbRef) {
@@ -211,21 +216,36 @@ class TravianTool extends React.Component<MyProps, MyState> {
             const filteredTransactionArray = transactionArray.filter((tr : Transaction) => {
                 return tr.item === item
             })
+            const sortedFilteredTransactionArray = filteredTransactionArray.sort((tr1, tr2) => tr1.timeStamp - tr2.timeStamp)
             let minX = 0;
-            const dayData = filteredTransactionArray.map((tr) => {
-                let x = (Math.floor(((tr.timeStamp - Date.now())/86400000)+0.5));
-                if (x < minX) minX = x;
-                return {x: x, y: tr.price/tr.quantity}
+            const dayData = sortedFilteredTransactionArray.map((tr) => {
+                let daysAgo = (Math.floor(((tr.timeStamp - Date.now())/86400000)+0.5));
+                if (daysAgo < minX) minX = daysAgo;
+                return {x: daysAgo, y: tr.price/tr.quantity}
             }).map((dp) => {
                 return {x: dp.x-minX, y: dp.y}
             })
+
+            const twentyPercent = minX*-0.8
+            const threeDays = (minX*-1)-3
+            const recentStartDay = Math.min(twentyPercent, threeDays)
+            const recentTransaction = dayData.filter((tr) => {
+                return tr.x >= recentStartDay
+            })             
+            
             this.setState({
                 dayData: dayData,
-                item: item
+                item: item,
+                recentDayData: recentTransaction,
+                recentNumOfDays: (minX*-1)-recentStartDay, 
+                sortedFilteredTransactions: sortedFilteredTransactionArray
             })
         } else {
             this.setState({
-                item,
+                dayData: [],
+                item: item,
+                recentDayData: [],
+                recentNumOfDays: 0
             })
         }
 
@@ -253,13 +273,15 @@ class TravianTool extends React.Component<MyProps, MyState> {
     render() {
 
         const { items, searchQuery, showResults, newServerName } = this.state;
+        const { auth } = this.props;
 
         // Filter items based on the search query
         const filteredItems = [...items].filter((item) =>
             item.toLowerCase().includes(searchQuery.toLowerCase())
         );
 
-        const yValues = this.state.dayData.map(dp => dp.y)
+        const priceValues = this.state.dayData.map(dp => dp.y)
+        const recentPriceValues = this.state.recentDayData.map(dp => dp.y)
 
         return (
             
@@ -269,80 +291,108 @@ class TravianTool extends React.Component<MyProps, MyState> {
                 }}>
                     <div className="col-sm-4" style={{}}></div>
                     <div className="col-sm-4" style={{ textAlign: "left", backgroundColor: "white" }}>
-                        <h2 className="mt-3" style={{ textAlign: "center" }}>Travian Auction Statistics</h2>
-                        <div className="btn-group mt-3">
-                            <button type="button" className="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Select Server
-                            </button>
-                            <div className="dropdown-menu">
-                                {Object.values(this.state.servers).map(server => (
-                                    <Link onClick={() => this.setServer(server)} key={server} className="dropdown-item" to="#" >{server}</Link>
-                                ))}
-                                <div className="dropdown-divider"></div>
-                                <a className="dropdown-item" onClick={() => this.showAddServer()} >Add new server</a>
+                        {auth.currentUser ? <>
+                            <h2 className="mt-3" style={{ textAlign: "center" }}>Travian Auction Statistics</h2>
+                            <div className="btn-group mt-3">
+                                <button type="button" className="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Select Server
+                                </button>
+                                {auth.currentUser &&
+                                    <div className="dropdown-menu">
+                                        {Object.values(this.state.servers).map(server => (
+                                            <Link onClick={() => this.setServer(server)} key={server} className="dropdown-item" to="#" >{server}</Link>
+                                        ))}
+                                        <div className="dropdown-divider"></div>
+                                        <a className="dropdown-item" onClick={() => this.showAddServer()} >Add new server</a>
+                                    </div>}
                             </div>
-                        </div>
-                        { this.state.showAddServerElement
-                            ? 
-                            <div className="input-group mt-3">
-                                <input type="text" className="form-control" placeholder="League Name" aria-label="League Name" aria-describedby="basic-addon2" value={newServerName} onChange={this.handleNewServerInputChange} />
-                                <div className="input-group-append">
-                                    <button onClick={() => this.addNewServer()} className="btn btn-outline-secondary" type="button" >Add</button>
-                                </div>
-                            </div>
-                            : <></>
-                        }
-                        {this.state.server &&
-                            <>
-                                <h3 className="mt-3" style={{ textAlign: "center" }}>Server: {this.state.server}</h3>
-                                <div>
-                                    {/* Search bar */}
-                                    <div className="form-group" style={{ marginBottom: '0' }}>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="Search..."
-                                            value={searchQuery}
-                                            onChange={this.handleSearchInputChange}
-                                            onBlur={this.handleSearchBlur}
-                                            onFocus={this.handleSearchFocus}
-                                        />
+                            {this.state.showAddServerElement && auth.currentUser
+                                ?
+                                <div className="input-group mt-3">
+                                    <input type="text" className="form-control" placeholder="League Name" aria-label="League Name" aria-describedby="basic-addon2" value={newServerName} onChange={this.handleNewServerInputChange} />
+                                    <div className="input-group-append">
+                                        <button onClick={() => this.addNewServer()} className="btn btn-outline-secondary" type="button" >Add</button>
                                     </div>
+                                </div>
+                                : <></>
+                            }
+                            {this.state.server &&
+                                <>
+                                    <h3 className="mt-3" style={{ textAlign: "center" }}>Server: {this.state.server}</h3>
+                                    <div>
+                                        {/* Search bar */}
+                                        <div className="form-group" style={{ marginBottom: '0' }}>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                placeholder="Search..."
+                                                value={searchQuery}
+                                                onChange={this.handleSearchInputChange}
+                                                onBlur={this.handleSearchBlur}
+                                                onFocus={this.handleSearchFocus}
+                                            />
+                                        </div>
 
-                                    {/* Display the search results */}
-                                    {showResults && (
-                                        <ul className="list-group">
-                                            {filteredItems.map((item) => (
-                                                <li onClick={() => this.selectItem(item)} key={item} className="list-group-item">
-                                                    {item}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    )}
-                                    { this.state.item &&
-                                    <>
-                                        <h2 className="mt-3" style={{ textAlign: "center" }}>{this.state.item}</h2>
-                                        <TravianToolChart data={this.state.dayData} />
-                                        <h3 className="mt-3" style={{ textAlign: "center" }}>Percentiles</h3>
-                                        <DataTable columns={["10%", "20%", "30%", "40%", "Average"]} data={[
-                                            [
-                                                calculatePercentile(yValues,10).toString(),
-                                                calculatePercentile(yValues,20).toString(),
-                                                calculatePercentile(yValues,30).toString(),
-                                                calculatePercentile(yValues,40).toString(),
-                                                (yValues.reduce((a, b) => a + b, 0) / yValues.length).toString()
-                                            ]
-                                        ]} />
-                                    </>
-                                    }
-                                    
-                                </div>
-                                <div className="row" style={{
-                                    margin: 0
-                                }}>
-                                    <button data-toggle="modal" data-target="#modalInsertDataForm" className="btn btn-primary mt-3" >Insert Data</button>
-                                </div>
-                            </>
+                                        {/* Display the search results */}
+                                        {showResults && (
+                                            <ul className="list-group">
+                                                {filteredItems.map((item) => (
+                                                    <li onClick={() => this.selectItem(item)} key={item} className="list-group-item">
+                                                        {item}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+                                        {this.state.item &&
+                                            <>
+                                                <h2 className="mt-3" style={{ textAlign: "center" }}>{this.state.item}</h2>
+                                                <TravianToolChart data={this.state.dayData} />
+                                                <h3 className="mt-3" style={{ textAlign: "center" }}>Percentiles</h3>
+                                                <DataTable columns={["10%", "20%", "30%", "40%", "Average"]} data={[
+                                                    [
+                                                        calculatePercentile(priceValues, 10).toFixed(2).toString(),
+                                                        calculatePercentile(priceValues, 20).toFixed(2).toString(),
+                                                        calculatePercentile(priceValues, 30).toFixed(2).toString(),
+                                                        calculatePercentile(priceValues, 40).toFixed(2).toString(),
+                                                        (priceValues.reduce((a, b) => a + b, 0) / priceValues.length).toFixed(2).toString()
+                                                    ]
+                                                ]} />
+                                                <h3 className="mt-3" style={{ textAlign: "center" }}>Last {this.state.recentNumOfDays} days</h3>
+                                                <DataTable columns={["10%", "20%", "30%", "40%", "Average"]} data={[
+                                                    [
+                                                        calculatePercentile(recentPriceValues, 10).toFixed(2).toString(),
+                                                        calculatePercentile(recentPriceValues, 20).toFixed(2).toString(),
+                                                        calculatePercentile(recentPriceValues, 30).toFixed(2).toString(),
+                                                        calculatePercentile(recentPriceValues, 40).toFixed(2).toString(),
+                                                        (recentPriceValues.reduce((a, b) => a + b, 0) / recentPriceValues.length).toFixed(2).toString()
+                                                    ]
+                                                ]} />
+
+                                                <h3 className="mt-3" style={{ textAlign: "center" }}>Transactions</h3>
+                                                <DataTable columns={["Quantity", "Name", "Bids", "Price", "Day", "Time"]} data={this.state.sortedFilteredTransactions.reverse().map((tr) => {
+                                                    return [
+                                                        tr.quantity.toString(), 
+                                                        tr.item, 
+                                                        tr.bids.toString(), 
+                                                        tr.price.toString(), 
+                                                        (Math.floor(((tr.timeStamp - Date.now())/86400000)+0.5)).toString(), 
+                                                        tr.time.toString() 
+                                                    ]
+                                                })} />
+                                                
+                                            </>
+                                        }
+
+                                    </div>
+                                    <div className="row" style={{
+                                        margin: 0
+                                    }}>
+                                        <button data-toggle="modal" data-target="#modalInsertDataForm" className="btn btn-primary mt-3" >Insert Data</button>
+                                    </div>
+                                </>
+                            }
+                        </> : 
+                        <h2 className="mt-3" style={{ textAlign: "center" }}>Log in to use this feature</h2>
                         }
                     </div>
                     <div className="col-sm-4"></div>

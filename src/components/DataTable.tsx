@@ -8,18 +8,6 @@ interface DataTableProps {
 
 class DataTable extends Component<DataTableProps> {
   render() {
-    const percentile = (arr: number[], val: number) => {
-      let count = 0;
-      arr.forEach(v => {
-        if (v < val) {
-          count++;
-        } else if (v == val) {
-          count += 0.5;
-        }
-      });
-      return 100 * count / arr.length;
-    }
-
     const { columns, data } = this.props;
 
     return (

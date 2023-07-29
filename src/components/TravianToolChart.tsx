@@ -30,6 +30,8 @@ class TravianToolChart extends Component<TravianToolChartProps, TravianToolChart
   }
   
   calculateTrendline = (data: PolynomialRegression.DataPoint[], order: number) => {
+    if (data.length<1) return;
+    
     const xs = data.map((p => p.x))
     const xmax = Math.max(...xs)
     const xmin = Math.min(...xs)

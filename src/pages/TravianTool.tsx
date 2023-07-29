@@ -26,6 +26,7 @@ type MyState = {
     newServerName: string;
     dayData: {x: number, y: number}[];
     recentDayData: {x: number, y: number}[];
+    timeData: {x: number, y: number}[]
     recentNumOfDays: number;
     sortedFilteredTransactions: Transaction[]
 };
@@ -68,6 +69,7 @@ class TravianTool extends React.Component<MyProps, MyState> {
         recentDayData: [],
         recentNumOfDays: 0,
         sortedFilteredTransactions: [],
+        timeData: [],
     };
     private databaseRef : firebase.database.Reference | null = null;
     blurTimeout: NodeJS.Timeout | null = null;
@@ -226,6 +228,12 @@ class TravianTool extends React.Component<MyProps, MyState> {
                 return {x: dp.x-minX, y: dp.y}
             })
 
+            const timeData = sortedFilteredTransactionArray
+            .filter((tr) => tr.time!=-1)
+            .map((tr) => {
+                return {x: tr.time, y: tr.price/tr.quantity}
+            })
+
             const twentyPercent = minX*-0.8
             const threeDays = (minX*-1)-3
             const recentStartDay = Math.min(twentyPercent, threeDays)
@@ -235,6 +243,7 @@ class TravianTool extends React.Component<MyProps, MyState> {
             
             this.setState({
                 dayData: dayData,
+                timeData: timeData,
                 item: item,
                 recentDayData: recentTransaction,
                 recentNumOfDays: (minX*-1)-recentStartDay, 
@@ -243,6 +252,7 @@ class TravianTool extends React.Component<MyProps, MyState> {
         } else {
             this.setState({
                 dayData: [],
+                timeData: [],
                 item: item,
                 recentDayData: [],
                 recentNumOfDays: 0
@@ -346,7 +356,10 @@ class TravianTool extends React.Component<MyProps, MyState> {
                                         {this.state.item &&
                                             <>
                                                 <h2 className="mt-3" style={{ textAlign: "center" }}>{this.state.item}</h2>
+                                                <h3 className="mt-3" style={{ textAlign: "center" }}>Price over time</h3>
                                                 <TravianToolChart data={this.state.dayData} />
+                                                <h3 className="mt-3" style={{ textAlign: "center" }}>Price over time of day</h3>
+                                                <TravianToolChart data={this.state.timeData} />
                                                 <h3 className="mt-3" style={{ textAlign: "center" }}>Percentiles</h3>
                                                 <DataTable columns={["10%", "20%", "30%", "40%", "Average"]} data={[
                                                     [

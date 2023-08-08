@@ -234,9 +234,9 @@ class TravianTool extends React.Component<MyProps, MyState> {
                 return {x: tr.time, y: tr.price/tr.quantity}
             })
 
-            const twentyPercent = minX*-0.8
+            const thirtyPercent = Math.floor(minX*-0.70)
             const threeDays = (minX*-1)-3
-            const recentStartDay = Math.min(twentyPercent, threeDays)
+            const recentStartDay = Math.min(thirtyPercent, threeDays)
             const recentTransaction = dayData.filter((tr) => {
                 return tr.x >= recentStartDay
             })             

@@ -15,7 +15,7 @@ export class Home extends Component {
                             <h1 className="masthead-heading mb-0">Tja</h1>
 
                             <p className="masthead-subheading font-weight-light mb-0">Jag heter Fabian.</p>
-                            <p className="masthead-subheading font-weight-light mb-0">Jag läser till civilingenjör i datateknik.</p>
+                            <p className="masthead-subheading font-weight-light mb-0">Jag är färdigutbildad civilingenjör i datateknik.</p>
                             <p className="masthead-subheading font-weight-light mb-0">Ibland gör jag lite dumma projekt och lägger upp dem här.</p>
 
                         </header>

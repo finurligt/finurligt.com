@@ -51,7 +51,9 @@ export class Sidebar extends Component {
                                 <FaIcons.FaWindowClose onClick={ this.toggleSidebar } />
                             </Link>
                         </li>
-                        {SidebarData.map((item,index) => {
+                        {SidebarData
+                        .filter(item => !item.loginRequired || auth.currentUser) // some items only display for logged in users
+                        .map((item,index) => {
                             return (
                                 <li key={index} className={item.className}>
                                     <Link to={item.path} onClick={ this.toggleSidebar }>

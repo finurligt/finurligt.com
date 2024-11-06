@@ -186,6 +186,8 @@ class TogglTool extends React.Component<MyProps, MyState> {
                     <div className="col-sm-4" style={{ textAlign: "left", backgroundColor: "white" }}>
                         <h2 className="mt-3" style={{ textAlign: "center" }}>Toggl Tool</h2> 
                         <small id="kurstillvaxtHelp" className="form-text text-muted">
+                        This is a tool to combine and summarize data from reports from the timetracking tool Toggl.
+                        
                         To get the files needed by this tool, go to your toggl reports and press "Detailed". The files can be downloaded from the upper right corner (pick "CSV"). With this tool you can merge multiple files into one (while removing any duplicate entries) or make a CSV file with the total duration of each project.</small>
                         
                         <input type="file" id="file-upload-input" name="file" onChange={this.setFile} multiple hidden/>

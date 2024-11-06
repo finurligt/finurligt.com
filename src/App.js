@@ -20,7 +20,7 @@ function App() {
           <Sidebar />
           <Switch >
             <Route path='/' exact component={Home} />
-            <Route path='/report' component={Report} />
+            <Route path='/timetracking' component={Report} />
             <Route path='/tool' component={Tool} />
             <Route path='/ratingLite' component={RatingLite} />
             <Route path='/togglTool' component={TogglTool} />

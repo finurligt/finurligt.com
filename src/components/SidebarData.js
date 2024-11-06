@@ -8,25 +8,29 @@ export const SidebarData = [
         title: 'Home',
         path: '/',
         icon: <FaIcons.FaHome/>,
-        className: 'nav-text'
+        className: 'nav-text',
+        loginRequired: false
     },
     {
         title: 'Jämför ISK med Aktie & Fondkonto',
         path: '/tool',
         icon: <FaIcons.FaCalculator/>,
-        className: 'nav-text'
+        className: 'nav-text',
+        loginRequired: false
     },
     {
         title: 'Timetracking',
-        path: '/report',
+        path: '/timetracking',
         icon: <AiIcons.AiOutlineBarChart/>,
-        className: 'nav-text'
+        className: 'nav-text',
+        loginRequired: true
     },
     {
         title: 'Toggl Tool',
         path: '/togglTool',
         icon: <FaIcons.FaWrench/>,
-        className: 'nav-text'
+        className: 'nav-text',
+        loginRequired: false
     },
     /*
     {
